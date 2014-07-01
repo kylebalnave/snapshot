@@ -1,1 +1,1 @@
-java -jar dist/Sanpshot.jar -cf ./config.json
+java -jar dist/Snapshot.jar -cf ./config.json
