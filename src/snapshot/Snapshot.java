@@ -17,8 +17,12 @@
 package snapshot;
 
 import java.io.FileNotFoundException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import semblance.reporters.Report;
+import semblance.reporters.SystemLogReport;
+import semblance.results.IResult;
 import snapshot.runners.ScreenshotRunner;
 
 /**
@@ -28,7 +32,7 @@ import snapshot.runners.ScreenshotRunner;
  */
 public class Snapshot {
 
-       /**
+    /**
      * @param args the command line arguments
      * @throws java.io.FileNotFoundException
      */
@@ -45,8 +49,12 @@ public class Snapshot {
         }
         ScreenshotRunner runner = new ScreenshotRunner(configUrlOrFilePath);
         try {
-            runner.run();
+            List<IResult> results = runner.run();
             runner.report();
+            //
+            // log the summary of all results
+            Report report = new SystemLogReport(results);
+            report.out();
         } catch (Exception ex) {
             Logger.getLogger(Snapshot.class.getName()).log(Level.SEVERE, null, ex);
         }
