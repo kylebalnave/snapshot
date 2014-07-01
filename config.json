@@ -1,0 +1,23 @@
+{
+	"threads" : 5,
+	"out": "./snaps/",
+	"urls": [
+		"http://www.ronseal.info/",
+		"http://www.google.co.uk/",
+		"http://www.madebypi.co.uk/"
+	],
+	"dimensions": [
+		[1600, 1200]
+	],
+	"drivers": [{
+			"name": "firefox",
+			"version": "",
+			"hub" : ""
+		}],
+	"reports": [
+		{
+			"className" : "semblance.reporters.JunitReport",
+			"out" : "./reports/ss.junit"
+		}
+	]
+}	

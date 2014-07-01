@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package snapshot;
+package snapshot.runners;
 
 import java.io.File;
 import java.net.URL;
@@ -35,13 +35,8 @@ import snapshot.webdriver.WebDriverHelper;
 import snapshot.webdriver.WindowSize;
 
 /**
- *
+ * A Class used to take screenshots using Selenium WebDriver
  * @author kyleb2
- */
-/**
- * Private Class
- *
- * @author balnave
  */
 class ScreenshotSeleniumDriver extends Runner implements Callable<List<IResult>> {
 
@@ -114,10 +109,8 @@ class ScreenshotSeleniumDriver extends Runner implements Callable<List<IResult>>
             result = new ScreenshotResult(screenshotURI, screenshotURI != null, endMs - startMs);
         } catch (Exception ex) {
             result = new ScreenshotResult(screenshotURI, success, ex.getMessage());
-            //result = new ScreenshotResult(url, false, String.format("Exception creating screenshot %s", ex.getMessage()));
         } catch (Error er) {
             result = new ScreenshotResult(screenshotURI, success, er.getMessage());
-            //result = new ScreenshotResult(url, false, String.format("Exception creating screenshot %s", er.getMessage()));
         } finally {
             localResults.add(result);
         }

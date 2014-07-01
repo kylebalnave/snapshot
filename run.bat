@@ -1,0 +1,1 @@
+java -jar dist/Sanpshot.jar -cf ./config.json
