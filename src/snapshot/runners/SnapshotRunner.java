@@ -22,14 +22,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import semblance.data.MapHelper;
-import semblance.results.IResult;
+import semblance.runners.MultiThreadRunner;
 import semblance.runners.Runner;
 import snapshot.webdriver.WindowSize;
 
@@ -38,7 +32,7 @@ import snapshot.webdriver.WindowSize;
  *
  * @author balnave
  */
-public class SnapshotRunner extends Runner {
+public class SnapshotRunner extends MultiThreadRunner {
 
     public static final String KEY_URLS = "urls";
     public static final String KEY_DIR_OUT = "out";
@@ -64,9 +58,8 @@ public class SnapshotRunner extends Runner {
     }
 
     @Override
-    public List<IResult> run() throws Exception {
-        int maxThreads = ((Number) getConfigValue(KEY_THREADS, 5)).intValue();
-        ExecutorService execSvc = Executors.newFixedThreadPool(maxThreads);
+    protected List<Runner> getRunnerCollection() {
+        List<Runner> queue = new ArrayList<Runner>();
         List<String> urls = (List<String>) getConfigValue(KEY_URLS, new ArrayList());
         List<List<Number>> dimensions = (List<List<Number>>) getConfigValue(KEY_DIMENSIONS, new ArrayList());
         List<Map> drivers = (List<Map>) getConfigValue(KEY_DRIVERS, new ArrayList());
@@ -78,7 +71,6 @@ public class SnapshotRunner extends Runner {
         outDir.mkdirs();
         //
         // log status
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "Start!");
         //
         // loop through each driver
         for (Map<String, Object> driver : drivers) {
@@ -89,39 +81,16 @@ public class SnapshotRunner extends Runner {
             // loop through each screen dimension setting
             for (final List<Number> dimension : dimensions) {
                 boolean hasHubUrl = false;
-                try {
-                    List<SnapshotSeleniumDriver> queue = new ArrayList<SnapshotSeleniumDriver>();
-                    //
-                    // loop through each url 
-                    for (final String url : urls) {
-                        hasHubUrl = hasHubUrl || !driverHub.isEmpty();
-                        WindowSize size = new WindowSize(driverName, dimension.get(0), dimension.get(1));
-                        SnapshotSeleniumDriver sShot = new SnapshotSeleniumDriver(driverName, driverVersion, driverHub, url, size, outDir, true);
-                        queue.add(sShot);
-                    }
-                    //
-                    // run the thread pool
-                    List<Future<List<IResult>>> futureResults = execSvc.invokeAll(queue);
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, "Adding results!");
-                    for (Future<List<IResult>> res : futureResults) {
-                        if (res.get() != null) {
-                            results.addAll(res.get());
-                        }
-                    }
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.WARNING, "Exception in thread", ex);
-                } catch (ExecutionException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.WARNING, "Exception in thread", ex);
-                } finally {
-                    if (!execSvc.isShutdown()) {
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, "Shutdown thread pool!");
-                        execSvc.shutdown();
-                    }
-
+                //
+                // loop through each url 
+                for (final String url : urls) {
+                    hasHubUrl = hasHubUrl || !driverHub.isEmpty();
+                    WindowSize size = new WindowSize(driverName, dimension.get(0), dimension.get(1));
+                    SnapshotSeleniumDriver sShot = new SnapshotSeleniumDriver(driverName, driverVersion, driverHub, url, size, outDir, true);
+                    queue.add(sShot);
                 }
             }
         }
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "End!");
-        return results;
+        return queue;
     }
 }

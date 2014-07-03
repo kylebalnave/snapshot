@@ -133,9 +133,5 @@ class SnapshotSeleniumDriver extends Runner implements Callable<List<IResult>> {
         return slug.toLowerCase(Locale.ENGLISH);
     }
 
-    @Override
-    public List<IResult> run() throws Exception, Error {
-        return call();
-    }
 
 }

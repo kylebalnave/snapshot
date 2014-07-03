@@ -34,7 +34,6 @@ import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.safari.SafariDriver;
 
 /**
  * Utility methods used with Selenium WebDriver
@@ -148,7 +147,6 @@ public class WebDriverHelper {
      * Closes the current WebDriver
      *
      * @param driver
-     * @return
      */
     public static void teardownDriver(WebDriver driver) {
         driver.quit();
