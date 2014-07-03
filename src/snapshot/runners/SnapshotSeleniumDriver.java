@@ -28,9 +28,11 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import org.openqa.selenium.WebDriver;
+import semblance.results.ErrorResult;
+import semblance.results.FailResult;
 import semblance.results.IResult;
+import semblance.results.PassResult;
 import semblance.runners.Runner;
-import snapshot.results.ScreenshotResult;
 import snapshot.webdriver.WebDriverHelper;
 import snapshot.webdriver.WindowSize;
 
@@ -38,7 +40,7 @@ import snapshot.webdriver.WindowSize;
  * A Class used to take screenshots using Selenium WebDriver
  * @author kyleb2
  */
-class ScreenshotSeleniumDriver extends Runner implements Callable<List<IResult>> {
+class SnapshotSeleniumDriver extends Runner implements Callable<List<IResult>> {
 
     private String driverName;
     private String driverVersion;
@@ -48,15 +50,15 @@ class ScreenshotSeleniumDriver extends Runner implements Callable<List<IResult>>
     private File outDir;
     private boolean saveAsJpeg = false;
 
-    public ScreenshotSeleniumDriver(Map config) {
+    public SnapshotSeleniumDriver(Map config) {
         super(config);
     }
 
-    public ScreenshotSeleniumDriver(String driverName, String driverVersion, String driverHubURL, String url, WindowSize size, File outDir) {
+    public SnapshotSeleniumDriver(String driverName, String driverVersion, String driverHubURL, String url, WindowSize size, File outDir) {
         this(driverName, driverVersion, driverHubURL, url, size, outDir, false);
     }
 
-    public ScreenshotSeleniumDriver(String driverName, String driverVersion, String driverHubURL, String url, WindowSize size, File outDir, boolean saveAsJpeg) {
+    public SnapshotSeleniumDriver(String driverName, String driverVersion, String driverHubURL, String url, WindowSize size, File outDir, boolean saveAsJpeg) {
         this(null);
         this.driverName = driverName;
         this.driverVersion = driverVersion;
@@ -72,9 +74,8 @@ class ScreenshotSeleniumDriver extends Runner implements Callable<List<IResult>>
         WebDriver driver;
         // create the IResult instance
         List<IResult> localResults = new ArrayList<IResult>();
-        ScreenshotResult result = null;
+        IResult result = null;
         String screenshotURI = null;
-        boolean success = false;
         try {
             long startMs = System.currentTimeMillis();
             if (driverHubURL != null && !driverHubURL.isEmpty()) {
@@ -94,7 +95,7 @@ class ScreenshotSeleniumDriver extends Runner implements Callable<List<IResult>>
                             size.getStringLabel(),
                             url)) + (saveAsJpeg ? ".jpg" : ".png");
             File permScreenshot = new File(outDir, fileName);
-            success = tmpScreenshot.exists();
+            boolean success = tmpScreenshot.exists();
             if (saveAsJpeg) {
                 IMCommand formatCommand = new SaveAsJpgCommand(1.0);
                 // save as jpeg to save disk space
@@ -106,11 +107,16 @@ class ScreenshotSeleniumDriver extends Runner implements Callable<List<IResult>>
             // stop the driver
             WebDriverHelper.teardownDriver(driver);
             long endMs = System.currentTimeMillis();
-            result = new ScreenshotResult(screenshotURI, screenshotURI != null, endMs - startMs);
+            String msg;
+            if(screenshotURI != null) {
+                result = new PassResult(screenshotURI, "Screenshot saved", "Screenshot saved", 0, 0, endMs - startMs);
+            } else {
+                result = new FailResult(screenshotURI, "Screenshot NOT saved", "Screenshot NOT saved", 0, 0, endMs - startMs);
+            }
         } catch (Exception ex) {
-            result = new ScreenshotResult(screenshotURI, success, ex.getMessage());
+            result = new ErrorResult(screenshotURI, ex.getMessage());
         } catch (Error er) {
-            result = new ScreenshotResult(screenshotURI, success, er.getMessage());
+            result = new ErrorResult(screenshotURI, er.getMessage());
         } finally {
             localResults.add(result);
         }

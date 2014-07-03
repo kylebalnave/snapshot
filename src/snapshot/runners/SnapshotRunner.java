@@ -38,21 +38,28 @@ import snapshot.webdriver.WindowSize;
  *
  * @author balnave
  */
-public class ScreenshotRunner extends Runner {
+public class SnapshotRunner extends Runner {
 
     public static final String KEY_URLS = "urls";
     public static final String KEY_DIR_OUT = "out";
     public static final String KEY_DIMENSIONS = "dimensions";
     public static final String KEY_DRIVERS = "drivers";
     public static final String KEY_THREADS = "threads";
-    
+
     public static final String DATE_FORMAT = "yyyy-MM-dd HH-mm-ss";
 
-    public ScreenshotRunner(Map config) {
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        callRunnerSequence(SnapshotRunner.class, args);
+    }
+
+    public SnapshotRunner(Map config) {
         super(config);
     }
 
-    public ScreenshotRunner(String configUrlOrFilePath) {
+    public SnapshotRunner(String configUrlOrFilePath) {
         super(configUrlOrFilePath);
     }
 
@@ -83,13 +90,13 @@ public class ScreenshotRunner extends Runner {
             for (final List<Number> dimension : dimensions) {
                 boolean hasHubUrl = false;
                 try {
-                    List<ScreenshotSeleniumDriver> queue = new ArrayList<ScreenshotSeleniumDriver>();
+                    List<SnapshotSeleniumDriver> queue = new ArrayList<SnapshotSeleniumDriver>();
                     //
                     // loop through each url 
                     for (final String url : urls) {
                         hasHubUrl = hasHubUrl || !driverHub.isEmpty();
                         WindowSize size = new WindowSize(driverName, dimension.get(0), dimension.get(1));
-                        ScreenshotSeleniumDriver sShot = new ScreenshotSeleniumDriver(driverName, driverVersion, driverHub, url, size, outDir, true);
+                        SnapshotSeleniumDriver sShot = new SnapshotSeleniumDriver(driverName, driverVersion, driverHub, url, size, outDir, true);
                         queue.add(sShot);
                     }
                     //
