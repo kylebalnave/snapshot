@@ -54,7 +54,7 @@ public class SaveAsJpgCommand implements IMCommand {
             Graphics2D graphic = newBufferedImage.createGraphics();
             graphic.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             result = graphic.drawImage(bufferedImage, 0, 0, newWidth, newHeight, 0, 0, bufferedImage.getWidth(), bufferedImage.getHeight(), null);
-            if (!result) {
+            if (result) {
                 // write to jpeg file
                 result = ImageIO.write(newBufferedImage, "jpg", new File(imageOutPath));
                 graphic.dispose();

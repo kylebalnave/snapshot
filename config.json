@@ -1,6 +1,6 @@
 {
 	"threads" : 5,
-	"out": "./snaps/",
+	"out": "./test/snaps/",
 	"urls": [
 		"http://www.ronseal.info/",
 		"http://www.google.co.uk/",
@@ -10,14 +10,14 @@
 		[1600, 1200]
 	],
 	"drivers": [{
-			"name": "firefox",
+			"name": "phantomjs",
 			"version": "",
 			"hub" : ""
 		}],
 	"reports": [
 		{
 			"className" : "semblance.reporters.JunitReport",
-			"out" : "./reports/ss.junit"
+			"out" : "./test/reports/ss.junit"
 		}
 	]
 }	
