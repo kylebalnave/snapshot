@@ -107,7 +107,6 @@ class SnapshotSeleniumDriver extends Runner implements Callable<List<IResult>> {
             // stop the driver
             WebDriverHelper.teardownDriver(driver);
             long endMs = System.currentTimeMillis();
-            String msg;
             if(screenshotURI != null) {
                 result = new PassResult(screenshotURI, "Screenshot saved", "Screenshot saved", 0, 0, endMs - startMs);
             } else {

@@ -70,8 +70,6 @@ public class SnapshotRunner extends MultiThreadRunner {
         File outDir = new File(new File(outDirPath + File.separator + formattedNow), "./");
         outDir.mkdirs();
         //
-        // log status
-        //
         // loop through each driver
         for (Map<String, Object> driver : drivers) {
             String driverName = (String) MapHelper.getValue(driver, "name", "firefox");
