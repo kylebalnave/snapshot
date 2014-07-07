@@ -11,6 +11,10 @@ When used in conjunction with [Disparity][2], it can be used as an alternative t
 ### Commandline Usage
 
     java -jar dist/Snapshot.jar -config ./config.json
+    
+### Dependencies
+
+The Semblance.jar [Semblance][1] should be included in the classpaths.
 
 ### Example Config
 
