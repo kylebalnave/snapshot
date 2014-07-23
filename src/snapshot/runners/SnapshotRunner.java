@@ -16,10 +16,7 @@
  */
 package snapshot.runners;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import semblance.data.MapHelper;
@@ -35,12 +32,8 @@ import snapshot.webdriver.WindowSize;
 public class SnapshotRunner extends MultiThreadRunner {
 
     public static final String KEY_URLS = "urls";
-    public static final String KEY_DIR_OUT = "out";
     public static final String KEY_DIMENSIONS = "dimensions";
     public static final String KEY_DRIVERS = "drivers";
-    public static final String KEY_THREADS = "threads";
-
-    public static final String DATE_FORMAT = "yyyy-MM-dd HH-mm-ss";
 
     /**
      * @param args the command line arguments
@@ -63,12 +56,6 @@ public class SnapshotRunner extends MultiThreadRunner {
         List<String> urls = (List<String>) getConfigValue(KEY_URLS, new ArrayList());
         List<List<Number>> dimensions = (List<List<Number>>) getConfigValue(KEY_DIMENSIONS, new ArrayList());
         List<Map> drivers = (List<Map>) getConfigValue(KEY_DRIVERS, new ArrayList());
-        String outDirPath = (String) getConfigValue(KEY_DIR_OUT, "./out");
-        Calendar cal = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-        String formattedNow = sdf.format(cal.getTime());
-        File outDir = new File(new File(outDirPath + File.separator + formattedNow), "./");
-        outDir.mkdirs();
         //
         // loop through each driver
         for (Map<String, Object> driver : drivers) {
@@ -84,7 +71,7 @@ public class SnapshotRunner extends MultiThreadRunner {
                 for (final String url : urls) {
                     hasHubUrl = hasHubUrl || !driverHub.isEmpty();
                     WindowSize size = new WindowSize(driverName, dimension.get(0), dimension.get(1));
-                    SnapshotSeleniumDriver sShot = new SnapshotSeleniumDriver(driverName, driverVersion, driverHub, url, size, outDir, true);
+                    SnapshotSeleniumDriver sShot = new SnapshotSeleniumDriver(config, driverName, driverVersion, driverHub, url, size);
                     queue.add(sShot);
                 }
             }

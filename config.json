@@ -1,5 +1,6 @@
 {
     "threads": 5,
+    "delayAfterLoadMs" : 3000,
     "out": "./test/snaps/",
     "urls": [
         "http://www.ronseal.info/",

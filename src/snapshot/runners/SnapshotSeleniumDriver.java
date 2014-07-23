@@ -15,19 +15,21 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-
 package snapshot.runners;
 
 import java.io.File;
 import java.net.URL;
 import java.text.Normalizer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import org.openqa.selenium.WebDriver;
+import org.testng.log4testng.Logger;
 import semblance.results.ErrorResult;
 import semblance.results.FailResult;
 import semblance.results.IResult;
@@ -38,6 +40,7 @@ import snapshot.webdriver.WindowSize;
 
 /**
  * A Class used to take screenshots using Selenium WebDriver
+ *
  * @author kyleb2
  */
 class SnapshotSeleniumDriver extends Runner implements Callable<List<IResult>> {
@@ -48,25 +51,41 @@ class SnapshotSeleniumDriver extends Runner implements Callable<List<IResult>> {
     private String url;
     private WindowSize size;
     private File outDir;
-    private boolean saveAsJpeg = false;
+    private Boolean saveAsJpeg = false;
+    private int delayAfterLoadMs = 0;
+
+    public static final String KEY_SAVE_AS_JPEG = "saveAsJpeg";
+    public static final String KEY_DIR_OUT = "out";
+    public static final String KEY_DELAY_AFTER_LOAD = "delayAfterLoadMs";
+    public static final String DATE_FORMAT = "yyyy-MM-dd HH-mm-ss";
 
     public SnapshotSeleniumDriver(Map config) {
         super(config);
     }
 
-    public SnapshotSeleniumDriver(String driverName, String driverVersion, String driverHubURL, String url, WindowSize size, File outDir) {
-        this(driverName, driverVersion, driverHubURL, url, size, outDir, false);
+    public SnapshotSeleniumDriver(String driverName, String driverVersion, String driverHubURL, String url, WindowSize size) {
+        this(null, driverName, driverVersion, driverHubURL, url, size);
     }
 
-    public SnapshotSeleniumDriver(String driverName, String driverVersion, String driverHubURL, String url, WindowSize size, File outDir, boolean saveAsJpeg) {
-        this(null);
+    public SnapshotSeleniumDriver(Map config, String driverName, String driverVersion, String driverHubURL, String url, WindowSize size) {
+        this(config);
         this.driverName = driverName;
         this.driverVersion = driverVersion;
         this.driverHubURL = driverHubURL;
         this.url = url;
-        this.outDir = outDir;
         this.size = size;
-        this.saveAsJpeg = saveAsJpeg;
+        this.saveAsJpeg = (Boolean) getConfigValue(KEY_SAVE_AS_JPEG, false);
+        this.delayAfterLoadMs = ((Number)getConfigValue(KEY_DELAY_AFTER_LOAD, 0)).intValue();
+        //
+        // generate an output directory name
+        String outDirPath = (String) getConfigValue(KEY_DIR_OUT, "./out");
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+        String formattedNow = sdf.format(cal.getTime());
+        //
+        // create the directory if it doesn't exist
+        this.outDir = new File(new File(outDirPath + File.separator + formattedNow), "./");
+        this.outDir.mkdirs();
     }
 
     @Override
@@ -86,6 +105,11 @@ class SnapshotSeleniumDriver extends Runner implements Callable<List<IResult>> {
             if (driver == null) {
                 throw new Exception(String.format("Driver Name %s is of unknown type", driverName));
             }
+            //
+            // sleep to allow page to finish rendering
+            Logger.getLogger(this.getClass()).info(String.format("Sleeping for %sms after loading %s", delayAfterLoadMs, url));
+            Thread.sleep(delayAfterLoadMs);
+            //
             // create a screenshot
             File tmpScreenshot = WebDriverHelper.takeScreenshot(driver);
             String fileName = makeURLSlug(
@@ -107,7 +131,7 @@ class SnapshotSeleniumDriver extends Runner implements Callable<List<IResult>> {
             // stop the driver
             WebDriverHelper.teardownDriver(driver);
             long endMs = System.currentTimeMillis();
-            if(screenshotURI != null) {
+            if (screenshotURI != null) {
                 result = new PassResult(screenshotURI, "Screenshot saved", "Screenshot saved", 0, 0, endMs - startMs);
             } else {
                 result = new FailResult(screenshotURI, "Screenshot NOT saved", "Screenshot NOT saved", 0, 0, endMs - startMs);
@@ -131,6 +155,5 @@ class SnapshotSeleniumDriver extends Runner implements Callable<List<IResult>> {
         String slug = NONLATIN.matcher(normalized).replaceAll("");
         return slug.toLowerCase(Locale.ENGLISH);
     }
-
 
 }
